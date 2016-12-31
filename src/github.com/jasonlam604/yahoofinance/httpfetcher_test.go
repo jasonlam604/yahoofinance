@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	
 )
 
 // Mock Client
@@ -32,7 +31,7 @@ func (c ClientObserver) OnSuccess(httpResponse *HttpResponse) {
 	responsetest = httpResponse
 }
 
-func (c ClientObserver) OnError(err error) {	
+func (c ClientObserver) OnError(err error) {
 	flagtests["error"] = 1
 }
 
@@ -46,70 +45,67 @@ func (c ClientObserver) OnDoneAll() {
 
 // Test Flags and test data
 var (
-	
 	urlstests = []string{
 		"http://www.fake-site-success.com",
 		"http://www.fake-site-error.com",
 		"http://www.fake-site-sucess-trigger-request.com",
 		"http://www.fake-site-3.com",
 	}
-	
-	responsetest = &HttpResponse{}
-	
-	flagtests =  map[string]int{
-	    "success": 0,
-	    "error":   0,
-	    "request": 0,
-	    "alldone": 0,
-	}
 
+	responsetest = &HttpResponse{}
+
+	flagtests = map[string]int{
+		"success": 0,
+		"error":   0,
+		"request": 0,
+		"alldone": 0,
+	}
 )
 
 // Mockup Fetch
 func (mwc *MockHttpClient) Fetch(httpHandler HttpHandler, urls []string) {
-	
+
 	for _, url := range urls {
-    
-          httpHandler.OnRequest(url)
-      
-      	  if url == "http://www.fake-site-success.com" {
-	      	  	r := &HttpResponse{"http://www.fake-site-success.com",http.StatusOK,"fake body data",nil}      	  	
-		      	httpHandler.OnSuccess(r)
-	      }
-      
-	      if url == "http://www.fake-site-error.com" {
-		      	httpHandler.OnError(nil)
-	      }
-    }
-	
+
+		httpHandler.OnRequest(url)
+
+		if url == "http://www.fake-site-success.com" {
+			r := &HttpResponse{"http://www.fake-site-success.com", http.StatusOK, "fake body data", nil}
+			httpHandler.OnSuccess(r)
+		}
+
+		if url == "http://www.fake-site-error.com" {
+			httpHandler.OnError(nil)
+		}
+	}
+
 	httpHandler.OnDoneAll()
 
 }
 
 // Unit Tester
 func TestFetchEvents(t *testing.T) {
-	
+
 	clientObserver := ClientObserver{}
-	
+
 	c := getTestClient()
-	c.Http.Fetch(clientObserver,urlstests)
+	c.Http.Fetch(clientObserver, urlstests)
 
 	fmt.Println(flagtests["request"])
-	
+
 	if flagtests["error"] != 1 {
-			t.Errorf("Errors actual %d, expected %d", flagtests["error"], 1)
+		t.Errorf("Errors actual %d, expected %d", flagtests["error"], 1)
 	}
-	
+
 	if responsetest.Url != "http://www.fake-site-success.com" {
-			t.Errorf("Response actual url %s, expected %s", responsetest.Url, "http://www.fake-site-success.com")
+		t.Errorf("Response actual url %s, expected %s", responsetest.Url, "http://www.fake-site-success.com")
 	}
-	
+
 	if flagtests["request"] != len(urlstests) {
-            t.Errorf("Requests actual %d, expected %d", flagtests["request"], len(urlstests))
+		t.Errorf("Requests actual %d, expected %d", flagtests["request"], len(urlstests))
 	}
-	
-		if flagtests["alldone"] != 1 {
-            t.Errorf("Requests actual %d, expected %d", flagtests["alldone"], 1)
+
+	if flagtests["alldone"] != 1 {
+		t.Errorf("Requests actual %d, expected %d", flagtests["alldone"], 1)
 	}
 }
-

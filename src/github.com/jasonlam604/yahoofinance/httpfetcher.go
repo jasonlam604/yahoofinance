@@ -29,7 +29,7 @@ type HttpResponse struct {
 
 // Represents client interface
 type Connector interface {
-	Fetch(HttpHandler, []string) 
+	Fetch(HttpHandler, []string)
 }
 
 // httpClient respresents "real" client
@@ -49,7 +49,7 @@ func NewHttpFetcher() *Client {
 
 // Concurrent HTTP Retriever specific to this package, expects to
 // parameters where the first is HttpHandler interface used as callback
-// when http processing is done or on error.  Second input parameter is 
+// when http processing is done or on error.  Second input parameter is
 // an array of URL strings. No values are returned.
 func (r *httpClient) Fetch(httpHandler HttpHandler, urls []string) {
 
@@ -60,15 +60,15 @@ func (r *httpClient) Fetch(httpHandler HttpHandler, urls []string) {
 	for _, url := range urls {
 		go func(url string) {
 
-			req, _ := http.NewRequest( "GET", url, nil )
-			
+			req, _ := http.NewRequest("GET", url, nil)
+
 			if resp, err := client.Do(req); nil != err {
 				ch <- &HttpResponse{url, http.StatusBadRequest, "", err}
 			} else {
 				defer resp.Body.Close()
-				
+
 				body, _ := ioutil.ReadAll(resp.Body)
-				
+
 				ch <- &HttpResponse{url, resp.StatusCode, string(body), err}
 			}
 
