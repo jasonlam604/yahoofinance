@@ -1,4 +1,4 @@
-// Package object httpfetcher implements concurrent utility for
+// Package yahoofinance object httpfetcher implements concurrent utility for
 // HTTP retrieval.
 //
 // Authored by Jason Lam, jasonlam604@gmail.com.
@@ -27,7 +27,7 @@ type HttpResponse struct {
 	Err        error
 }
 
-// Represents client interface
+// Connector represents client interface
 type Connector interface {
 	Fetch(HttpHandler, []string)
 }
@@ -36,11 +36,12 @@ type Connector interface {
 type httpClient struct {
 }
 
+// Client 
 type Client struct {
 	Http Connector
 }
 
-// Client Helper createor
+// NewHttpFetcher represents client Helper creator
 func NewHttpFetcher() *Client {
 	c := new(Client)
 	c.Http = new(httpClient)
