@@ -36,7 +36,7 @@ type Connector interface {
 type httpClient struct {
 }
 
-// Client 
+// Client impl for Connector
 type Client struct {
 	Http Connector
 }
