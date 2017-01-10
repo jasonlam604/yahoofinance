@@ -6,7 +6,6 @@
 package yahoofinance
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 )
@@ -52,6 +51,11 @@ var (
 		"http://www.fake-site-3.com",
 	}
 
+	urlsrealtests = []string{
+		"http://www.google.com",
+		"http://www.googleXXX.com",
+	}
+
 	responsetest = &HttpResponse{}
 
 	flagtests = map[string]int{
@@ -83,15 +87,22 @@ func (mwc *MockHttpClient) Fetch(httpHandler HttpHandler, urls []string) {
 
 }
 
-// Unit Tester
-func TestFetchEvents(t *testing.T) {
+func resetTestFlags() {
+	flagtests["success"] = 0
+	flagtests["error"] = 0
+	flagtests["request"] = 0
+	flagtests["alldone"] = 0
+}
+
+// Mock Unit Tester
+func TestMockFetchEvents(t *testing.T) {
 
 	clientObserver := ClientObserver{}
 
+	resetTestFlags()
+
 	c := getTestClient()
 	c.Http.Fetch(clientObserver, urlstests)
-
-	fmt.Println(flagtests["request"])
 
 	if flagtests["error"] != 1 {
 		t.Errorf("Errors actual %d, expected %d", flagtests["error"], 1)
@@ -102,6 +113,32 @@ func TestFetchEvents(t *testing.T) {
 	}
 
 	if flagtests["request"] != len(urlstests) {
+		t.Errorf("Requests actual %d, expected %d", flagtests["request"], len(urlstests))
+	}
+
+	if flagtests["alldone"] != 1 {
+		t.Errorf("Requests actual %d, expected %d", flagtests["alldone"], 1)
+	}
+}
+
+func TestRealFetchEvents(t *testing.T) {
+
+	clientObserver := ClientObserver{}
+
+	resetTestFlags()
+
+	c := NewHttpFetcher()
+	c.Http.Fetch(clientObserver, urlsrealtests)
+
+	if flagtests["error"] != 1 {
+		t.Errorf("Errors actual %d, expected %d", flagtests["error"], 1)
+	}
+
+	if responsetest.Url != "http://www.google.com" {
+		t.Errorf("Response actual url %s, expected %s", responsetest.Url, "http://www.fake-site-success.com")
+	}
+
+	if flagtests["request"] != len(urlsrealtests) {
 		t.Errorf("Requests actual %d, expected %d", flagtests["request"], len(urlstests))
 	}
 
